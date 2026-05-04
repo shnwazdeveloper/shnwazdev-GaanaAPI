@@ -19,6 +19,9 @@ DOWN_FOLDER = '.'
 REQUEST_TIMEOUT = 12
 PRELOADED_STATE = 'window.__PRELOADED_STATE__ = '
 GAANA_BASE_URL = 'https://gaana.com'
+CURRENT_STREAM_KEY = base64.b64decode('Z3kxdCNiQGpsKGIkd3RtZQ==')
+LEGACY_STREAM_KEY = 'g@1n!(f1#r.0$)&%'.encode('utf-8')
+LEGACY_STREAM_IV = 'asd!@#!@#@!12312'.encode('utf-8')
 headers = {
     'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0'
 }
@@ -102,13 +105,37 @@ def fix_album_art(url):
     return url
 
 
-def decryptLink(message):
-    IV = 'asd!@#!@#@!12312'.encode('utf-8')
-    KEY = 'g@1n!(f1#r.0$)&%'.encode('utf-8')
-    aes = AES.new(KEY, AES.MODE_CBC, IV)
-    # message=message.encode('utf-8')
+def pkcs7_unpad_bytes(data):
+    pad = data[-1]
+    if pad < 1 or pad > AES.block_size:
+        raise ValueError('Invalid stream padding')
+    return data[:-pad]
+
+
+def decrypt_current_link(message):
+    iv_position = int(message[0])
+    iv = message[iv_position:iv_position+16].encode('utf-8')
+    encrypted = message[iv_position+16:]
+    encrypted = encrypted + ('=' * (-len(encrypted) % 4))
+    cipher_text = base64.b64decode(encrypted)
+    aes = AES.new(CURRENT_STREAM_KEY, AES.MODE_CBC, iv)
+    return pkcs7_unpad_bytes(aes.decrypt(cipher_text)).decode('utf-8')
+
+
+def decrypt_legacy_link(message):
+    aes = AES.new(LEGACY_STREAM_KEY, AES.MODE_CBC, LEGACY_STREAM_IV)
     message = message + ('=' * (-len(message) % 4))
     return unpad((aes.decrypt(base64.b64decode(message))).decode('utf-8'))
+
+
+def decryptLink(message):
+    if not message:
+        return None
+
+    try:
+        return decrypt_current_link(message)
+    except Exception:
+        return decrypt_legacy_link(message)
 
 
 def fix_artist_name(t):
@@ -211,7 +238,9 @@ def current_track_to_song(track, fallback_link, lyrics):
         'artist': get_artist_names(track.get('artist')),
         'released': track.get('release_date') or track.get('released') or '',
         'bitrate': bitrate,
-        'link': playable_link
+        'link': playable_link,
+        'stream_url': playable_link,
+        'audio_url': playable_link
     }
     if lyrics:
         song['lyrics'] = get_lyrics(gaana_url)
@@ -414,6 +443,8 @@ def sample_song():
         'released': '2016-12-02',
         'bitrate': '128',
         'link': None,
+        'stream_url': None,
+        'audio_url': None,
     }
 
 
@@ -467,7 +498,9 @@ def downloadAndParsePage(link, lyrics):
                 'artist': fix_artist_name(json_song['artist']),
                 'released': json_song['release_date'],
                 'bitrate': bitrate,
-                'link': playable_link
+                'link': playable_link,
+                'stream_url': playable_link,
+                'audio_url': playable_link
             }
             if lyrics:
                 song['lyrics'] = get_lyrics(song['gaana_url'])

@@ -16,6 +16,7 @@ Dev by `SHNWAZ`.
 - Album metadata with track lists
 - Search endpoint for songs, albums, artists, playlists, and mixed results
 - Artwork, lyrics, stream-status, sample, and resolve helper endpoints
+- Playable HLS audio URL support through `/api/stream`
 - CORS headers enabled for frontend clients
 
 ## Live Local URL
@@ -124,9 +125,19 @@ curl "http://localhost:5555/api/endpoints"
   "duration": "2min 39sec",
   "released": "2016-12-02",
   "bitrate": "128",
-  "link": null
+  "link": "https://vodhlsgaana-ebw.akamaized.net/..."
 }
 ```
+
+## Audio Playback
+
+Use `/api/stream` when a player needs only the playable audio URL:
+
+```bash
+curl "http://localhost:5555/api/stream?seokey=alone-1435"
+```
+
+The response includes `link`, `stream`, `stream_url`, `audio_url`, and `hls_url` aliases for the same HLS `.m3u8` URL.
 
 ## Vercel Deployment
 
@@ -160,7 +171,7 @@ vercel dev --listen 5555
 
 Gaana page structure and regional access can affect upstream scraping reliability. `/health` only checks that this Flask service is online; it does not call Gaana.
 
-The current Gaana web payload can provide metadata while withholding a decryptable stream URL. In that case, the API still returns song data and sets `link` to `null`.
+The API supports Gaana's current encrypted HLS stream format. If Gaana expires, blocks, or withholds stream metadata for a track, the API still returns song data and sets the stream URL fields to `null`.
 
 ## License
 

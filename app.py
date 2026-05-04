@@ -7,7 +7,7 @@ import gaana
 
 
 SERVICE_NAME = "shnwazdev-GaanaAPI"
-API_VERSION = "1.1.0"
+API_VERSION = "1.1.1"
 SAMPLE_URL = "https://gaana.com/song/alone-1435"
 
 app = Flask(__name__)
@@ -436,6 +436,11 @@ def api_stream():
             "title": song.get("title"),
             "bitrate": song.get("bitrate"),
             "link": stream_link,
+            "stream": stream_link,
+            "stream_url": stream_link,
+            "audio_url": stream_link,
+            "hls_url": stream_link,
+            "format": "hls" if stream_link else None,
             "gaana_url": song.get("gaana_url"),
             "note": None if stream_link else "Gaana did not expose a decryptable stream link for this request.",
         }
