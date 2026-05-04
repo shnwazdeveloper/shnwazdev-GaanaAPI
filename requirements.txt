@@ -1,11 +1,6 @@
-Flask
-gunicorn
-httplib2
-requests
-beautifulsoup4
-clint
-pycryptodome
-requests-toolbelt
-pyDes
-bs4
-lxml
+Flask>=3.0
+gunicorn>=22.0
+requests>=2.32
+beautifulsoup4>=4.12
+pycryptodome>=3.20
+lxml>=5.2

@@ -1,11 +1,11 @@
 {
-  "name": "GaanaAPI",
-  "description": "Unofficial API of Gaana.",
+  "name": "shnwazdev-GaanaAPI",
+  "description": "Unofficial Gaana metadata API with docs, health checks, and Vercel-ready Flask deployment.",
   "keywords": [
     "flask",
     "python",
     "gaana",
     "music"
   ],
-  "repository": "https://github.com/cyberboysumanjay/gaanaapi"
+  "repository": "https://github.com/shnwazdeveloper/shnwazdev-GaanaAPI"
 }

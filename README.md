@@ -1,76 +1,84 @@
-## Gaana API [Unofficial]
+# shnwazdev-GaanaAPI
 
-### Show some :heart: and :star: the repo to support the project
+Unofficial Gaana metadata API built with Flask. This version keeps the original `/result/` API route, adds Vercel-friendly aliases, includes a clean docs website, and exposes health checks for uptime monitoring.
 
-[![GitHub stars](https://img.shields.io/github/stars/cyberboysumanjay/gaanaapi.svg?style=social&label=Star)](https://github.com/cyberboysumanjay/GaanaAPI) ![GitHub followers](https://img.shields.io/github/followers/cyberboysumanjay.svg?style=social&label=Follow)
-[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/) [![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
-[![Telegram Channel](https://img.shields.io/badge/Telegram-Channel-orange)](https://t.me/sjprojects)
-#### Gaana API written in Python using Flask  
+Original project: [cyberboysumanjay/GaanaAPI](https://github.com/cyberboysumanjay/GaanaAPI)
 
- ---
-###### **NOTE:** You need to have Gaana link of the song in order to fetch the song details, search feature may be implemented in future if requested.  
+## Endpoints
 
- ---
-  
-#### Features:
-##### Currently the API can get the following details for a specific song in JSON format:
-- **Album Name**
-- **Artist Name**
-- **Bitrate Fetched**
-- **Duration of song**
-- **Song Language**
-- **Playable m3u8 Link**
-- **Release Date**
-- **Album Art Link (Max Resolution)**
-- **Song Title**
-- **Lyrics**
+| Method | Path | Purpose |
+| --- | --- | --- |
+| `GET` | `/` or `/docs` | API docs website with health and request tester |
+| `GET` | `/health` | Service health JSON |
+| `GET` | `/api/health` | Health alias for API clients |
+| `GET` | `/api` | JSON index of docs and endpoints |
+| `GET` or `POST` | `/result/` | Original song metadata endpoint |
+| `GET` or `POST` | `/api/result` | Vercel-style song metadata alias |
+
+## API Usage
+
+```bash
+curl "http://localhost:5555/result/?url=https://gaana.com/song/alone-1435&lyrics=true"
+```
+
+Query parameters:
+
+| Name | Required | Description |
+| --- | --- | --- |
+| `url` | Yes | Full Gaana song URL |
+| `lyrics` | No | Set to `true` to fetch lyrics when available |
+
+Successful song lookups return a JSON array:
 
 ```json
-{
-"album":"Alone",
-"artist":"Alan Walker",
-"bitrate":"96",
-"duration":"2min 39sec",
-"gaana_url":"https://gaana.com/song/alone-1435",
-"language":"English",
-"link":"https://vodhls-vh.akamaihd.net/i/songs/54/1854954/21232014/21232014_96.mp4/master.m3u8?set-akamai-hls-revision=5&hdnts=st=1562082331~exp=1562100331~acl=/i/songs/54/1854954/21232014/21232014_96.mp4/*~hmac=1dac0568ef4d53a5aadc314fba45f5b587dc1e098cd7dddb76fe1f1d2b4a24a1",
-"released":"Dec 02, 2016",
-"thumb":"https://a10.gaanacdn.com/images/albums/54/1854954/crop_640x640_1854954.jpg",
-"title":"Alone"
-}
+[
+  {
+    "status": true,
+    "title": "Song title",
+    "album": "Album name",
+    "artist": "Artist name",
+    "thumb": "https://...",
+    "duration": "2min 39sec",
+    "link": "https://..."
+  }
+]
 ```
 
-#### Installation:
+Errors return JSON with `status: false` and an `error` message.
 
-Clone this repository using
-```sh
-$ git clone https://github.com/cyberboysumanjay/GaanaAPI
+## Local Development
+
+```bash
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+python app.py
 ```
-Enter the directory and install all the requirements using
-```sh
-$ pip3 install -r requirements.txt
+
+Open [http://localhost:5555](http://localhost:5555).
+
+## Vercel Deployment
+
+Vercel can deploy Flask apps directly when the root project exports a Flask instance named `app` from `app.py`.
+
+```bash
+vercel deploy
 ```
-Run the app using
-```sh
-$ python3 app.py
+
+For local Vercel emulation after installing the Vercel CLI:
+
+```bash
+vercel dev --listen 5555
 ```
-Navigate to 127.0.0.1:5000 to see the Homepage
 
-#### Usage:
-Lyrics fetching is optional and is triggered only when ```&lyrics=true``` is added with the url
-```sh
-http://127.0.0.1:5000/result/?url=<insert-gaana-link-here>&lyrics=true
-```
-**Example:** Navigate to http://127.0.0.1:5000/result/?url=https://gaana.com/song/alone-1435&lyrics=true to get a json response of song data in return.
+The static docs stylesheet lives in `public/styles.css`, which Vercel serves from the Edge Network. The Flask route for `/styles.css` keeps the same UI working when running with `python app.py`.
 
+## Notes
 
-### You can fork the repo and deploy on VPS or deploy it on Heroku :)  
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/cyberboysumanjay/gaanaapi/tree/master)
-**Note:** Heroku gives US/Europe servers which won't be able to fetch all songs flawlessly. Use any Indian VPS for fetching accurate results.
-## Made using this API :heart:
-##### [@songdl_bot](https://t.me/songdl_bot) - Song Downloader Bot on Telegram
+Gaana page structure and regional access can affect upstream scraping reliability. `/health` only checks that this Flask service is online; it does not call Gaana.
 
-#### Star the Repo in case you liked it :)
-#### Made with :heart: in India
+The current Gaana web payload can provide metadata while withholding a decryptable stream URL. In that case, the API still returns the song data and sets `link` to `null`.
 
-# © [Sumanjay](https://cyberboysumanjay.github.io)
+## License
+
+This project keeps the original MIT license from `cyberboysumanjay/GaanaAPI`.

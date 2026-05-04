@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ service_name }} Docs</title>
+  <meta name="description" content="Documentation and health page for the unofficial Gaana metadata API.">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="{{ service_name }} home">
+      <span class="brand-mark">G</span>
+      <span>{{ service_name }}</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary navigation">
+      <a href="#endpoints">Endpoints</a>
+      <a href="#tester">Try</a>
+      <a href="/health">Health</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="intro">
+      <div class="intro-copy">
+        <p class="eyebrow">Unofficial Gaana metadata API</p>
+        <h1>Clean Flask API for song data, artwork, optional lyrics, and stream links when available.</h1>
+        <p class="lead">Use the original <code>/result/</code> route or the Vercel-style <code>/api/result</code> alias. Both return JSON and work from the same Flask app.</p>
+      </div>
+      <aside class="status-panel" aria-labelledby="status-title">
+        <span id="status-title">Service health</span>
+        <strong id="health-state" aria-live="polite">Checking</strong>
+        <code>GET /health</code>
+      </aside>
+    </section>
+
+    <section class="summary-grid" aria-label="API summary">
+      <div class="summary-item">
+        <span>Runtime</span>
+        <strong>Flask on Vercel</strong>
+      </div>
+      <div class="summary-item">
+        <span>Local port</span>
+        <strong>5555</strong>
+      </div>
+      <div class="summary-item">
+        <span>Response</span>
+        <strong>JSON</strong>
+      </div>
+      <div class="summary-item">
+        <span>Version</span>
+        <strong>{{ api_version }}</strong>
+      </div>
+    </section>
+
+    <section id="tester" class="workspace-section">
+      <div class="section-heading">
+        <p class="eyebrow">Try a request</p>
+        <h2>Live API tester</h2>
+      </div>
+      <form class="tester" id="tester-form">
+        <label for="song-url">Gaana song URL</label>
+        <div class="request-row">
+          <input id="song-url" name="url" type="url" value="{{ sample_url }}" placeholder="https://gaana.com/song/example" required>
+          <label class="checkbox-label">
+            <input id="lyrics" name="lyrics" type="checkbox">
+            Lyrics
+          </label>
+          <button type="submit">Run</button>
+        </div>
+      </form>
+      <div class="result-shell">
+        <div class="result-toolbar">
+          <span id="request-path">GET /result/</span>
+          <span id="request-status">Idle</span>
+        </div>
+        <pre id="result-output">Run a request to view the JSON response.</pre>
+      </div>
+    </section>
+
+    <section id="endpoints" class="workspace-section">
+      <div class="section-heading">
+        <p class="eyebrow">Reference</p>
+        <h2>Endpoints</h2>
+      </div>
+      <div class="endpoint-list">
+        {% for endpoint in endpoints %}
+        <article class="endpoint-row">
+          <span class="method">{{ endpoint.method }}</span>
+          <code>{{ endpoint.path }}</code>
+          <p>{{ endpoint.summary }}</p>
+          <small>{{ endpoint.params }}</small>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="workspace-section split-section">
+      <div>
+        <div class="section-heading">
+          <p class="eyebrow">Example</p>
+          <h2>Request</h2>
+        </div>
+        <pre class="code-block">curl "http://localhost:5555/result/?url={{ sample_url }}&amp;lyrics=true"</pre>
+      </div>
+      <div>
+        <div class="section-heading">
+          <p class="eyebrow">Deploy</p>
+          <h2>Vercel</h2>
+        </div>
+        <pre class="code-block">vercel deploy</pre>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <span>{{ service_name }}</span>
+    <span>Unofficial API wrapper for public Gaana song pages.</span>
+  </footer>
+
+  <script>
+    const healthState = document.querySelector("#health-state");
+    const form = document.querySelector("#tester-form");
+    const output = document.querySelector("#result-output");
+    const requestPath = document.querySelector("#request-path");
+    const requestStatus = document.querySelector("#request-status");
+
+    async function checkHealth() {
+      try {
+        const response = await fetch("/health");
+        const data = await response.json();
+        healthState.textContent = data.status ? "Online" : "Degraded";
+        healthState.dataset.state = data.status ? "ok" : "warn";
+      } catch (error) {
+        healthState.textContent = "Offline";
+        healthState.dataset.state = "error";
+      }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const url = document.querySelector("#song-url").value;
+      const lyrics = document.querySelector("#lyrics").checked;
+      const endpoint = `/result/?url=${encodeURIComponent(url)}&lyrics=${lyrics}`;
+
+      requestPath.textContent = `GET ${endpoint}`;
+      requestStatus.textContent = "Loading";
+      output.textContent = "Fetching...";
+
+      try {
+        const response = await fetch(endpoint);
+        const data = await response.json();
+        requestStatus.textContent = `${response.status} ${response.statusText}`;
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        requestStatus.textContent = "Request failed";
+        output.textContent = JSON.stringify({ status: false, error: error.message }, null, 2);
+      }
+    });
+
+    checkHealth();
+  </script>
+</body>
+</html>
