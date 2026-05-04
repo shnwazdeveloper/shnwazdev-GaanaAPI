@@ -24,8 +24,8 @@
     <section class="intro">
       <div class="intro-copy">
         <p class="eyebrow">Unofficial Gaana metadata API</p>
-        <h1>Clean Flask API for song data, artwork, optional lyrics, and stream links when available.</h1>
-        <p class="lead">Use the original <code>/result/</code> route or the Vercel-style <code>/api/result</code> alias. Both return JSON and work from the same Flask app.</p>
+        <h1>Clean Flask API for songs, albums, search, artwork, lyrics, and health checks.</h1>
+        <p class="lead">Every public endpoint is listed in the catalog below. Use the original <code>/result/</code> route or the newer <code>/api/*</code> endpoints for JSON clients.</p>
       </div>
       <aside class="status-panel" aria-labelledby="status-title">
         <span id="status-title">Service health</span>
@@ -51,12 +51,16 @@
         <span>Version</span>
         <strong>{{ api_version }}</strong>
       </div>
+      <div class="summary-item">
+        <span>Endpoints</span>
+        <strong>{{ endpoints|length }}</strong>
+      </div>
     </section>
 
     <section id="tester" class="workspace-section">
       <div class="section-heading">
         <p class="eyebrow">Try a request</p>
-        <h2>Live API tester</h2>
+        <h2>Song endpoint tester</h2>
       </div>
       <form class="tester" id="tester-form">
         <label for="song-url">Gaana song URL</label>
@@ -90,6 +94,7 @@
           <code>{{ endpoint.path }}</code>
           <p>{{ endpoint.summary }}</p>
           <small>{{ endpoint.params }}</small>
+          <small>{{ endpoint.group }}</small>
         </article>
         {% endfor %}
       </div>
@@ -99,16 +104,30 @@
       <div>
         <div class="section-heading">
           <p class="eyebrow">Example</p>
-          <h2>Request</h2>
+          <h2>Song</h2>
         </div>
-        <pre class="code-block">curl "http://localhost:5555/result/?url={{ sample_url }}&amp;lyrics=true"</pre>
+        <pre class="code-block">curl "http://localhost:5555/api/song?url={{ sample_url }}"</pre>
       </div>
       <div>
         <div class="section-heading">
-          <p class="eyebrow">Deploy</p>
-          <h2>Vercel</h2>
+          <p class="eyebrow">Example</p>
+          <h2>Search</h2>
         </div>
-        <pre class="code-block">vercel deploy</pre>
+        <pre class="code-block">curl "http://localhost:5555/api/search?q=alone&amp;type=song&amp;limit=5"</pre>
+      </div>
+      <div>
+        <div class="section-heading">
+          <p class="eyebrow">Example</p>
+          <h2>Album</h2>
+        </div>
+        <pre class="code-block">curl "http://localhost:5555/api/album/alone-english-2016-4"</pre>
+      </div>
+      <div>
+        <div class="section-heading">
+          <p class="eyebrow">Example</p>
+          <h2>Catalog</h2>
+        </div>
+        <pre class="code-block">curl "http://localhost:5555/api/endpoints"</pre>
       </div>
     </section>
   </main>

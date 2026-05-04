@@ -204,7 +204,7 @@ h2 {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
   margin: 26px 0 40px;
 }
@@ -340,7 +340,7 @@ button:hover {
 
 .endpoint-row {
   display: grid;
-  grid-template-columns: 72px minmax(150px, 220px) minmax(0, 1fr) minmax(150px, 240px);
+  grid-template-columns: 96px minmax(150px, 230px) minmax(0, 1fr) minmax(150px, 240px) 100px;
   gap: 14px;
   align-items: center;
   border: 1px solid var(--line);
@@ -364,6 +364,7 @@ button:hover {
   color: var(--green);
   font-size: 12px;
   font-weight: 900;
+  text-align: center;
 }
 
 .split-section {
