@@ -2,6 +2,8 @@
 
 Unofficial Gaana metadata API built with Flask, redesigned for Vercel deployment and local development. It includes a clean docs website, health checks, song lookup, album lookup, search, artwork, lyrics, stream status, URL resolve helpers, and a machine-readable endpoint catalog.
 
+Dev by `SHNWAZ`.
+
 [Original project](https://github.com/cyberboysumanjay/GaanaAPI) by Sumanjay. This repo is a modernized fork for `shnwazdeveloper`.
 
 ## Features
