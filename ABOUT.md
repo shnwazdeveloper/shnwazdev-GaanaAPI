@@ -9,6 +9,7 @@
 - Search results for songs, albums, artists, playlists, and mixed results
 - Artwork, lyrics, stream-status, health, resolve, sample, and endpoint catalog routes
 - Playable HLS audio URLs when Gaana provides valid stream metadata
+- Free access with no built-in request limit, API key, quota, or search-result cap
 - A clean documentation website served by the same Flask app
 
 ## Main Use Cases
@@ -26,9 +27,13 @@ The project is prepared for:
 - Vercel Python/Flask deployment
 - GitHub public repository distribution
 
+## API Limits
+
+The app does not enforce rate limits, API keys, daily quotas, or a maximum search-result cap. Search is unlimited by default and `limit=all`, `limit=unlimited`, or `limit=0` also return every result available from the upstream Gaana page.
+
 ## Important Note
 
-This is an unofficial API wrapper around public Gaana web pages. Gaana can change its page structure or encrypted stream payload at any time. This build supports the current encrypted HLS stream format, but expired, blocked, or missing stream metadata can still return `null`.
+This is an unofficial API wrapper around public Gaana web pages. Gaana can change its page structure or encrypted stream payload at any time. This build supports the current encrypted HLS stream format, but expired, blocked, or missing stream metadata can still return `null`. Gaana or your hosting provider can still apply upstream limits outside this app.
 
 ## Credit
 

@@ -7,7 +7,9 @@ import gaana
 
 
 SERVICE_NAME = "shnwazdev-GaanaAPI"
-API_VERSION = "1.1.1"
+API_VERSION = "1.1.2"
+API_ACCESS = "free"
+API_LIMIT = "unlimited"
 SAMPLE_URL = "https://gaana.com/song/alone-1435"
 
 app = Flask(__name__)
@@ -146,7 +148,7 @@ ENDPOINTS = [
         "method": "GET",
         "path": "/api/search",
         "summary": "Search Gaana and return normalized results.",
-        "params": "q=<query>&type=all|song|album|artist|playlist&limit=10",
+        "params": "q=<query>&type=all|song|album|artist|playlist&limit=all",
     },
     {
         "group": "Utility",
@@ -180,11 +182,22 @@ def _request_value(name, default=None):
     return request.args.get(name) or request.form.get(name) or body.get(name, default)
 
 
-def _request_limit(default=10):
+def _request_limit(default=None):
+    value = _request_value("limit", default)
+    if value is None:
+        return None
+
+    if isinstance(value, str):
+        value = value.strip().lower()
+        if value in {"", "0", "all", "none", "no-limit", "no_limit", "unlimited"}:
+            return None
+
     try:
-        return max(1, min(int(_request_value("limit", default)), 50))
+        limit = int(value)
     except (TypeError, ValueError):
         return default
+
+    return limit if limit > 0 else None
 
 
 def _valid_http_url(value):
@@ -260,6 +273,8 @@ def health():
             "status": True,
             "service": SERVICE_NAME,
             "version": API_VERSION,
+            "access": API_ACCESS,
+            "limit": API_LIMIT,
             "runtime": "flask",
         }
     )
@@ -272,6 +287,8 @@ def api_index():
             "status": True,
             "service": SERVICE_NAME,
             "version": API_VERSION,
+            "access": API_ACCESS,
+            "limit": API_LIMIT,
             "docs": "/docs",
             "health": "/health",
             "endpoints_url": "/api/endpoints",
@@ -287,6 +304,8 @@ def api_endpoints():
             "status": True,
             "service": SERVICE_NAME,
             "version": API_VERSION,
+            "access": API_ACCESS,
+            "limit": API_LIMIT,
             "count": len(ENDPOINTS),
             "endpoints": ENDPOINTS,
         }
@@ -487,7 +506,7 @@ def api_search():
         payload = gaana.search(
             query,
             _request_value("type", "all"),
-            _request_limit(10),
+            _request_limit(),
         )
     except Exception as exc:
         app.logger.exception("Failed to search Gaana")

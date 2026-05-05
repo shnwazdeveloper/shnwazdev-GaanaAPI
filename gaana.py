@@ -387,11 +387,28 @@ def normalize_search_item(item):
     }
 
 
-def search(query, item_type='all', limit=10):
+def normalize_limit(limit):
+    if limit is None:
+        return None
+
+    if isinstance(limit, str):
+        limit = limit.strip().lower()
+        if limit in {'', '0', 'all', 'none', 'no-limit', 'no_limit', 'unlimited'}:
+            return None
+
+    try:
+        limit = int(limit)
+    except (TypeError, ValueError):
+        return None
+
+    return limit if limit > 0 else None
+
+
+def search(query, item_type='all', limit=None):
     if not query:
         raise ValueError('Search query is required')
 
-    limit = max(1, min(int(limit or 10), 50))
+    limit = normalize_limit(limit)
     link = GAANA_BASE_URL+'/search/'+quote(str(query).strip())
     state = get_preloaded_state(fetch_text(link))
     search_state = state.get('search') if state else {}
@@ -412,11 +429,13 @@ def search(query, item_type='all', limit=10):
                 continue
             seen.add(key)
             results.append(result)
-            if len(results) >= limit:
+            if limit is not None and len(results) >= limit:
                 return {
                     'status': True,
                     'query': query,
                     'type': requested_type or 'all',
+                    'limit': limit,
+                    'unlimited': False,
                     'count': len(results),
                     'results': results,
                 }
@@ -425,6 +444,8 @@ def search(query, item_type='all', limit=10):
         'status': True,
         'query': query,
         'type': requested_type or 'all',
+        'limit': limit,
+        'unlimited': limit is None,
         'count': len(results),
         'results': results,
     }

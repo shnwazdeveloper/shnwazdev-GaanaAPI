@@ -17,6 +17,7 @@ Dev by `SHNWAZ`.
 - Search endpoint for songs, albums, artists, playlists, and mixed results
 - Artwork, lyrics, stream-status, sample, and resolve helper endpoints
 - Playable HLS audio URL support through `/api/stream`
+- Free API access with no built-in request or search-result limit
 - CORS headers enabled for frontend clients
 
 ## Live Local URL
@@ -59,7 +60,7 @@ curl "http://localhost:5555/result/?url=https://gaana.com/song/alone-1435&lyrics
 Search songs:
 
 ```bash
-curl "http://localhost:5555/api/search?q=alone&type=song&limit=5"
+curl "http://localhost:5555/api/search?q=alone&type=song&limit=unlimited"
 ```
 
 Fetch album tracks:
@@ -108,8 +109,14 @@ curl "http://localhost:5555/api/endpoints"
 | `lyrics` | song, result, album | Set to `true` to include lyrics when available |
 | `q` | search | Search query |
 | `type` | search | `all`, `song`, `album`, `artist`, or `playlist` |
-| `limit` | search | Number of results, max `50` |
+| `limit` | search | Optional result count. Use `all`, `unlimited`, `0`, or omit it for no app limit |
 | `path` | resolve | Gaana path such as `/song/alone-1435` |
+
+## Free Unlimited API
+
+This project does not enforce API keys, rate limits, daily quotas, or a maximum search-result cap. `/api/search` is unlimited by default and also accepts `limit=all`, `limit=unlimited`, or `limit=0`.
+
+Gaana and hosting providers can still apply their own upstream/network limits outside this app.
 
 ## Example Song Response
 
